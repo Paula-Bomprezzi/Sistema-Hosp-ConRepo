@@ -23,6 +23,8 @@ public class Cita implements Serializable {
     private final LocalDateTime fechaHora;
     private final BigDecimal costo;
     @Setter
+    private Long id;
+    @Setter
     private EstadoCita estado;
     @Setter
     private String observaciones;
@@ -33,6 +35,7 @@ public class Cita implements Serializable {
         this.sala = Objects.requireNonNull(builder.sala, "La sala no puede ser nula");
         this.fechaHora = Objects.requireNonNull(builder.fechaHora, "La fecha y hora no pueden ser nulas");
         this.costo = Objects.requireNonNull(builder.costo, "El costo no puede ser nulo");
+        this.id = builder.id;
         this.estado = builder.estado != null ? builder.estado : EstadoCita.PROGRAMADA;
         this.observaciones = builder.observaciones != null ? builder.observaciones : "";
     }
@@ -43,6 +46,7 @@ public class Cita implements Serializable {
         private Sala sala;
         private LocalDateTime fechaHora;
         private BigDecimal costo;
+        private Long id;
         private EstadoCita estado;
         private String observaciones;
 
@@ -68,6 +72,11 @@ public class Cita implements Serializable {
 
         public CitaBuilder costo(BigDecimal costo) {
             this.costo = costo;
+            return this;
+        }
+
+        public CitaBuilder id(Long id) {
+            this.id = id;
             return this;
         }
 
@@ -100,6 +109,10 @@ public class Cita implements Serializable {
 
     public BigDecimal getCosto() {
         return costo;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public EstadoCita getEstado() {
@@ -144,7 +157,8 @@ public class Cita implements Serializable {
         String numeroSala = values[2];
         LocalDateTime fechaHora = LocalDateTime.parse(values[3]);
         BigDecimal costo = new BigDecimal(values[4]);
-        EstadoCita estado = EstadoCita.valueOf(values[5]);
+        int id = Integer.parseInt(values[5]);
+        EstadoCita estado = EstadoCita.valueOf(values[6]);
         String observaciones = values[6].replaceAll(";", ",");
 
         Paciente paciente = pacientes.get(dniPaciente);

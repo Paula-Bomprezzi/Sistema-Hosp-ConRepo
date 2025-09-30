@@ -9,14 +9,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import Repositorio.InMemoryRepository;
 import Exceptions.CitaException;
 import Servicios.CitaManager;
+
 
 public class Main {
     public static void main(String[] args) {
         System.out.println("===== SISTEMA DE GESTIÓN HOSPITALARIA =====\n");
 
+
+    
         try {
             // 1. Inicializar el hospital y su estructura
             Hospital hospital = inicializarHospital();
@@ -35,7 +38,13 @@ public class Main {
             mostrarInformacionCompleta(hospital, citaManager);
 
             // 6. Probar persistencia de datos
+
+            //Con CSV
             probarPersistencia(citaManager, pacientes, medicos, hospital);
+            //cON EL REPOSITORIO
+            InMemoryRepository<Cita> citaRepo = new InMemoryRepository<>();
+            probarPersistenciaRepo(citaManager, pacientes, medicos, hospital, citaRepo);
+            probarLecturaRepo(citaRepo, pacientes);
 
             // 7. Ejecutar pruebas de validación
             ejecutarPruebasValidacion(citaManager, medicos, pacientes, hospital);
@@ -399,6 +408,54 @@ public class Main {
             System.err.println("✗ Error en persistencia: " + e.getMessage());
         }
 
+        System.out.println();
+    }
+
+    private static void probarPersistenciaRepo(CitaManager citaManager, List<Paciente> pacientes, List<Medico> medicos, Hospital hospital, InMemoryRepository<Cita> citaRepo) {
+        System.out.println("===== PRUEBA DE PERSISTENCIA CON REPOSITORIO =====");
+    
+        try {        
+            // Guardar todas las citas del CitaManager en el repositorio
+            List<Cita> todasLasCitas = citaManager.getCitas();
+            for (Cita cita : todasLasCitas) {
+                citaRepo.save(cita);
+            }
+            System.out.println("✓ " + todasLasCitas.size() + " citas guardadas en repositorio en memoria");
+        } catch (Exception e) {
+            System.err.println("✗ Error en persistencia con repositorio: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        System.out.println();
+    }
+
+    private static void probarLecturaRepo(InMemoryRepository<Cita> citaRepo, List<Paciente> pacientes) {
+        System.out.println("===== PRUEBA DE LECTURA CON REPOSITORIO =====");
+    
+        try {
+            // Buscar todas las citas
+            List<Cita> citasEnRepo = citaRepo.findAll();
+            System.out.println("✓ Total de citas en repositorio: " + citasEnRepo.size());
+    
+            // Buscar citas por paciente
+            System.out.println("✓ Citas por paciente:");
+            for (Paciente paciente : pacientes) {
+                List<Cita> citasDelPaciente = citaRepo.genericFindByField("paciente", paciente);
+                System.out.println("  - Paciente " + paciente.getDni() + " (" + paciente.getNombre() + " " + paciente.getApellido() + "): " + citasDelPaciente.size() + " citas");
+            }
+    
+            // Buscar citas por estado
+            System.out.println("✓ Citas por estado:");
+            for (EstadoCita estado : EstadoCita.values()) {
+                List<Cita> citasDelEstado = citaRepo.genericFindByField("estado", estado);
+                System.out.println("  - " + estado.getDescripcion() + ": " + citasDelEstado.size() + " citas");
+            }
+    
+        } catch (Exception e) {
+            System.err.println("✗ Error leyendo del repositorio: " + e.getMessage());
+            e.printStackTrace();
+        }
+    
         System.out.println();
     }
 

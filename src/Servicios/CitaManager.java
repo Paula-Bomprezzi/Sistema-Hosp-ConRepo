@@ -151,6 +151,11 @@ public class CitaManager implements CitaService {
         }
     }
 
+    //Nuevo método para recorres las citas y guardarlas en el repo
+    public List<Cita> getCitas() {
+        return Collections.unmodifiableList(citas);
+    }
+
     @Override
     public void guardarCitas(String filename) throws IOException {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
